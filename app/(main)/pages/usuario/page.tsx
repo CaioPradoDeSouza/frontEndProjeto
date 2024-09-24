@@ -5,19 +5,15 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { FileUpload } from 'primereact/fileupload';
-import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
-import { Rating } from 'primereact/rating';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { UsuarioService } from '../../../../service/UsuarioService';
 import { Projeto } from '@/types';
 
-/* @todo Used 'as any' for types here. Will fix in next version due to onSelectionChange event type issue. */
+
 const Usuario = () => {
     let usuarioVazio: Projeto.Usuario = {
         id: 0,
@@ -32,23 +28,23 @@ const Usuario = () => {
     const [deleteUsuarioDialog, setDeleteUsuarioDialog] = useState(false);
     const [deleteUsuariosDialog, setDeleteUsuariosDialog] = useState(false);
     const [usuario, setUsuario] = useState<Projeto.Usuario>(usuarioVazio);
-    const [selectedUsuarios, setSelectedUsuarios] = useState(null);
+    const [selectedUsuarios, setSelectedUsuarios] = useState<Projeto.Usuario[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState('');
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
-    const usuarioService = new UsuarioService();
+    const usuarioService = useMemo(() => new UsuarioService(), []);
 
     useEffect(() => {
-        if(!usuarios){
-        usuarioService.listarTodos()
-        .then((response) => {
-            console.log(response.data);
-            setUsuarios(response.data);
-        }).catch((error) => {
-            console.log(error);
-        })
-    }
+        if (!usuarios) {
+            usuarioService.listarTodos()
+                .then((response) => {
+                    console.log(response.data);
+                    setUsuarios(response.data);
+                }).catch((error) => {
+                    console.log(error);
+                })
+        }
     }, [usuarioService, usuarios]);
 
     const openNew = () => {
@@ -73,29 +69,29 @@ const Usuario = () => {
     const saveUsuario = () => {
         setSubmitted(true);
 
-        if(!usuario.id){
+        if (!usuario.id) {
             usuarioService.inserir(usuario)
-            .then((response) => {
-                setUsuarioDialog(false);
-                setUsuario(usuarioVazio);
-                setUsuarios(null);
-                toast.current?.show({
-                    severity:'success',
-                    summary: 'Successful',
-                    detail: 'Usuario criado com sucesso',
-                    life: 3000
+                .then((response) => {
+                    setUsuarioDialog(false);
+                    setUsuario(usuarioVazio);
+                    setUsuarios(null);
+                    toast.current?.show({
+                        severity: 'success',
+                        summary: 'Successful',
+                        detail: 'Usuario criado com sucesso',
+                        life: 3000
+                    });
+                }).catch((error) => {
+                    console.log(error);
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Erro ao salvar.',
+                        life: 3000
+                    })
                 });
-            }).catch((error) =>{
-                console.log(error);
-                toast.current?.show({
-                    severity:'error',
-                    summary: 'Error',
-                    detail: 'Erro ao salvar.',
-                    life: 3000
-                })
-            });
 
-        }else{
+        } else {
             usuarioService.alterar(usuario)
                 .then((response) => {
                     setUsuarioDialog(false);
@@ -115,7 +111,7 @@ const Usuario = () => {
                     })
                 })
         }
-        
+
     };
 
     const editUsuario = (usuario: Projeto.Usuario) => {
@@ -130,48 +126,27 @@ const Usuario = () => {
 
     const deleteUsuario = () => {
         if (usuario.id) {
-        usuarioService.excluir(usuario.id)
-        .then((response) => {
-            setUsuario(usuarioVazio);
-            setDeleteUsuarioDialog(false);
-            setUsuarios(null);
-            toast.current?.show({
-                severity:'success',
-                summary: 'sucesso!',
-                detail: 'Usuário deletado com sucesso !',
-                life: 3000
-            });
-        }).catch((error) => {  
-            toast.current?.show({
-                severity:'error',
-                summary: 'Error',
-                detail: 'Erro ao deletar.',
-                life: 3000
-            });
-        });
-    }
+            usuarioService.excluir(usuario.id)
+                .then((response) => {
+                    setUsuario(usuarioVazio);
+                    setDeleteUsuarioDialog(false);
+                    setUsuarios(null);
+                    toast.current?.show({
+                        severity: 'success',
+                        summary: 'sucesso!',
+                        detail: 'Usuário deletado com sucesso !',
+                        life: 3000
+                    });
+                }).catch((error) => {
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Erro ao deletar.',
+                        life: 3000
+                    });
+                });
+        }
     };
-
-    // const findIndexById = (id: string) => {
-    //     let index = -1;
-    //     for (let i = 0; i < (products as any)?.length; i++) {
-    //         if ((products as any)[i].id === id) {
-    //             index = i;
-    //             break;
-    //         }
-    //     }
-
-    //     return index;
-    // };
-
-    // const createId = () => {
-    //     let id = '';
-    //     let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    //     for (let i = 0; i < 5; i++) {
-    //         id += chars.charAt(Math.floor(Math.random() * chars.length));
-    //     }
-    //     return id;
-    // };
 
     const exportCSV = () => {
         dt.current?.exportCSV();
@@ -182,14 +157,14 @@ const Usuario = () => {
     };
 
     const deleteSelectedUsuarios = () => {
-        
+
         Promise.all(selectedUsuarios.map(async (_usuario) => {
             if (_usuario.id) {
                 await usuarioService.excluir(_usuario.id);
             }
         })).then((response) => {
             setUsuarios(null);
-            setSelectedUsuarios(null);
+            setSelectedUsuarios([]);
             setDeleteUsuariosDialog(false);
             toast.current?.show({
                 severity: 'success',
@@ -207,12 +182,6 @@ const Usuario = () => {
         });
     };
 
-    // const onCategoryChange = (e: RadioButtonChangeEvent) => {
-    //     let _product = { ...product };
-    //     _product['category'] = e.value;
-    //     setProduct(_product);
-    // };
-
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, name: string) => {
         const val = (e.target && e.target.value) || '';
         let _usuario = { ...usuario };
@@ -220,14 +189,6 @@ const Usuario = () => {
 
         setUsuario(_usuario);
     };
-
-    // const onInputNumberChange = (e: InputNumberValueChangeEvent, name: string) => {
-    //     const val = e.value || 0;
-    //     let _product = { ...product };
-    //     _product[`${name}`] = val;
-
-    //     setProduct(_product);
-    // };
 
     const leftToolbarTemplate = () => {
         return (
@@ -351,7 +312,7 @@ const Usuario = () => {
                         <Column field="id" header="Código" sortable body={idBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="nome" header="Nome" sortable body={nomeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="email" header="Email" sortable body={emailBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
-                        <Column field="login" header="Login" sortable body={loginBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>     
+                        <Column field="login" header="Login" sortable body={loginBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
@@ -416,7 +377,7 @@ const Usuario = () => {
                             {submitted && !usuario.email && <small className="p-invalid">Email é obrigatório.</small>}
                         </div>
 
-                        
+
                     </Dialog>
 
                     <Dialog visible={deleteUsuarioDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteUsuarioDialogFooter} onHide={hideDeleteUsuarioDialog}>
