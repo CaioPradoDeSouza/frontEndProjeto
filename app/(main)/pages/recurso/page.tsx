@@ -186,7 +186,7 @@ const Recurso = () => {
         _recurso[`${name}`] = val;
 
         setRecurso(_recurso);
-    };
+};
 
     const leftToolbarTemplate = () => {
         return (
@@ -208,7 +208,7 @@ const Recurso = () => {
         );
     };
 
-    const idBodyTemplate = (rowData: Projeto.Usuario) => {
+    const idBodyTemplate = (rowData: Projeto.Recurso) => {
         return (
             <>
                 <span className="p-column-title">Código</span>
@@ -217,7 +217,7 @@ const Recurso = () => {
         );
     };
 
-    const nomeBodyTemplate = (rowData: Projeto.Usuario) => {
+    const nomeBodyTemplate = (rowData: Projeto.Recurso) => {
         return (
             <>
                 <span className="p-column-title">Nome</span>
@@ -226,29 +226,20 @@ const Recurso = () => {
         );
     };
 
-    const loginBodyTemplate = (rowData: Projeto.Usuario) => {
+    const chaveBodyTemplate = (rowData: Projeto.Recurso) => {
         return (
             <>
-                <span className="p-column-title">Login</span>
-                {rowData.login}
+                <span className="p-column-title">Chave</span>
+                {rowData.chave}
             </>
         );
     };
 
-    const emailBodyTemplate = (rowData: Projeto.Usuario) => {
+    const actionBodyTemplate = (rowData: Projeto.Recurso) => {
         return (
             <>
-                <span className="p-column-title">E-mail</span>
-                {rowData.email}
-            </>
-        );
-    };
-
-    const actionBodyTemplate = (rowData: Projeto.Usuario) => {
-        return (
-            <>
-                <Button icon="pi pi-pencil" rounded severity="success" className="mr-2" onClick={() => editUsuario(rowData)} />
-                <Button icon="pi pi-trash" rounded severity="warning" onClick={() => confirmDeleteUsuario(rowData)} />
+                <Button icon="pi pi-pencil" rounded severity="success" className="mr-2" onClick={() => editRecurso(rowData)} />
+                <Button icon="pi pi-trash" rounded severity="warning" onClick={() => confirmDeleteRecurso(rowData)} />
             </>
         );
     };
@@ -263,7 +254,7 @@ const Recurso = () => {
         </div>
     );
 
-    const usuarioDialogFooter = (
+    const recursoDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" text onClick={hideDialog} />
             <Button label="Salvar" icon="pi pi-check" text onClick={saveRecurso} />
@@ -272,7 +263,7 @@ const Recurso = () => {
     const deleteRecursoDialogFooter = (
         <>
             <Button label="Não" icon="pi pi-times" text onClick={hideDeleteRecursoDialog} />
-            <Button label="Sim" icon="pi pi-check" text onClick={deleteUsuario} />
+            <Button label="Sim" icon="pi pi-check" text onClick={deleteRecurso} />
         </>
     );
     const deleteRecursosDialogFooter = (
@@ -309,90 +300,58 @@ const Recurso = () => {
                         <Column selectionMode="multiple" headerStyle={{ width: '4rem' }}></Column>
                         <Column field="id" header="Código" sortable body={idBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="nome" header="Nome" sortable body={nomeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
-                        <Column field="email" header="Email" sortable body={emailBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
-                        <Column field="login" header="Login" sortable body={loginBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
+                        <Column field="chave" header="chave" sortable body={chaveBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                    <Dialog visible={usuarioDialog} style={{ width: '450px' }} header="Detalhes de Usuário" modal className="p-fluid" footer={usuarioDialogFooter} onHide={hideDialog}>
+                    <Dialog visible={recursoDialog} style={{ width: '450px' }} header="Detalhes do recurso" modal className="p-fluid" footer={recursoDialogFooter} onHide={hideDialog}>
                         <div className="field">
                             <label htmlFor="nome">Nome</label>
                             <InputText
                                 id="nome"
-                                value={usuario.nome}
+                                value={recurso.nome}
                                 onChange={(e) => onInputChange(e, 'nome')}
                                 required
                                 autoFocus
                                 className={classNames({
-                                    'p-invalid': submitted && !usuario.nome
+                                    'p-invalid': submitted && !recurso.nome
                                 })}
                             />
-                            {submitted && !usuario.nome && <small className="p-invalid">Nome é obrigatório.</small>}
+                            {submitted && !recurso.nome && <small className="p-invalid">Recurso é obrigatório.</small>}
                         </div>
 
                         <div className="field">
-                            <label htmlFor="login">Login</label>
+                            <label htmlFor="chave">Chave</label>
                             <InputText
-                                id="login"
-                                value={usuario.login}
-                                onChange={(e) => onInputChange(e, 'login')}
+                                id="chave"
+                                value={recurso.chave}
+                                onChange={(e) => onInputChange(e, 'chave')}
                                 required
                                 autoFocus
                                 className={classNames({
-                                    'p-invalid': submitted && !usuario.nome
+                                    'p-invalid': submitted && !recurso.chave
                                 })}
                             />
-                            {submitted && !usuario.login && <small className="p-invalid">Login é obrigatório.</small>}
+                            {submitted && !recurso.chave && <small className="p-invalid">Chave é obrigatório.</small>}
                         </div>
-
-                        <div className="field">
-                            <label htmlFor="senha">Senha</label>
-                            <InputText
-                                id="senha"
-                                value={usuario.senha}
-                                onChange={(e) => onInputChange(e, 'senha')}
-                                required
-                                autoFocus
-                                className={classNames({
-                                    'p-invalid': submitted && !usuario.nome
-                                })}
-                            />
-                            {submitted && !usuario.senha && <small className="p-invalid">Senha é obrigatório.</small>}
-                        </div>
-
-                        <div className="field">
-                            <label htmlFor="email">E-mail</label>
-                            <InputText
-                                id="email"
-                                value={usuario.email}
-                                onChange={(e) => onInputChange(e, 'email')}
-                                required
-                                autoFocus
-                                className={classNames({
-                                    'p-invalid': submitted && !usuario.nome
-                                })}
-                            />
-                            {submitted && !usuario.email && <small className="p-invalid">Email é obrigatório.</small>}
-                        </div>
-
-
+                            
                     </Dialog>
 
-                    <Dialog visible={deleteUsuarioDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteUsuarioDialogFooter} onHide={hideDeleteUsuarioDialog}>
+                    <Dialog visible={deleteRecursoDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteRecursoDialogFooter} onHide={hideDeleteRecursoDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                            {usuario && (
+                            {recurso && (
                                 <span>
-                                    Você realmente deseja excluir o usuário? <b>{usuario.nome}</b>?
+                                    Você realmente deseja excluir o recurso? <b>{recurso.nome}</b>?
                                 </span>
                             )}
                         </div>
                     </Dialog>
 
-                    <Dialog visible={deleteUsuariosDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteUsuariosDialogFooter} onHide={hideDeleteUsuariosDialog}>
+                    <Dialog visible={deleteRecursosDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteRecursosDialogFooter} onHide={hideDeleteRecursosDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                            {usuario && <span>Você realmente deseja excluir os usuários?</span>}
+                            {recurso && <span>Você realmente deseja excluir os recursos?</span>}
                         </div>
                     </Dialog>
                 </div>
