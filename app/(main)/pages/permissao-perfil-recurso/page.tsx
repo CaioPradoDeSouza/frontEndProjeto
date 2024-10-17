@@ -11,6 +11,7 @@ import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Projeto } from '@/types';
+import { userAgent } from 'next/server';
 import { RecursoService } from '@/service/RecursoService';
 import { UsuarioService } from '@/service/UsuarioService';
 import { PerfilService } from '@/service/PerfilService';
@@ -32,7 +33,7 @@ const PermissaoPerfilRecurso = () => {
     const [deletePermissaoPerfilRecursoDialog, setDeletePermissaoPerfilRecursoDialog] = useState(false);
     const [deletePermissaoPerfilRecursosDialog, setDeletePermissaoPerfilRecursosDialog] = useState(false);
     const [permissaoPerfilRecurso, setPermissaoPerfilRecurso] = useState<Projeto.PermissaoPerfilRecurso>(permissaoPerfilRecursoVazio);
-    const [selectedPermissaoPerfilRecurso, setSelectedPermissaoPerfilRecurso] = useState<Projeto.PermissaoPerfilRecurso[]>([]);
+    const [selectedPermissaoPerfilRecursos, setSelectedPermissaoPerfilRecursos] = useState<Projeto.PermissaoPerfilRecurso[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState('');
     const toast = useRef<Toast>(null);
@@ -40,11 +41,12 @@ const PermissaoPerfilRecurso = () => {
     const permissaoPerfilRecursoService = useMemo(() => new PermissaoPerfilRecursoService(), []);
     const recursoService = useMemo(() => new RecursoService(), []);
     const perfilService = useMemo(() => new PerfilService(), []);
-    const [perfis, setPerfis] = useState<Projeto.Perfil[] | null>(null);
-    const [recursos, setRecursos] = useState<Projeto.Recurso[] | null>(null);
+    const [recursos, setRecursos] = useState<Projeto.Recurso[]>([]);
+    const [perfis, setPerfis] = useState<Projeto.Perfil[]>([]);
+   
 
     useEffect(() => {
-        if (!permissaoPerfilRecurso) {
+        if (!permissaoPerfilRecursos) {
             permissaoPerfilRecursoService.listarTodos()
                 .then((response) => {
                     console.log(response.data);
@@ -53,7 +55,7 @@ const PermissaoPerfilRecurso = () => {
                     console.log(error);
                 })
         }
-    }, [permissaoPerfilRecursoService, permissaoPerfilRecurso]);
+    }, [permissaoPerfilRecursoService, permissaoPerfilRecursos]);
 
     useEffect(() => {
         if(permissaoPerfilRecursoDialog){
@@ -156,7 +158,7 @@ const PermissaoPerfilRecurso = () => {
     };
 
     const confirmDeletePermissaoPerfilRecurso = (permissaoPerfilRecurso: Projeto.PermissaoPerfilRecurso) => {
-        setPermissaoPerfilRecurso(permissaoPerfilRecurso); return
+        setPermissaoPerfilRecurso(permissaoPerfilRecurso); 
         setDeletePermissaoPerfilRecursoDialog(true);
     };
 
@@ -189,19 +191,19 @@ const PermissaoPerfilRecurso = () => {
     };
 
     const confirmDeleteSelected = () => {
-        setDeletePermissaoPerfilRecursoDialog(true);
+        setDeletePermissaoPerfilRecursosDialog(true);
     };
 
     const deleteSelectedPermissaoPerfilRecursos = () => {
 
-        Promise.all(selectedPermissaoPerfilRecurso.map(async (_permissaoPerfilRecurso) => {
+        Promise.all(selectedPermissaoPerfilRecursos.map(async (_permissaoPerfilRecurso) => {
             if (_permissaoPerfilRecurso.id) {
                 await permissaoPerfilRecursoService.excluir(_permissaoPerfilRecurso.id);
             }
         })).then((response) => {
             setPermissaoPerfilRecursos(null);
-            setSelectedPermissaoPerfilRecurso([]);
-            setDeletePermissaoPerfilRecursoDialog(false);
+            setSelectedPermissaoPerfilRecursos([]);
+            setDeletePermissaoPerfilRecursosDialog(false);
             toast.current?.show({
                 severity: 'success',
                 summary: 'Sucesso!',
@@ -235,7 +237,7 @@ const PermissaoPerfilRecurso = () => {
             <React.Fragment>
                 <div className="my-2">
                     <Button label="Novo" icon="pi pi-plus" severity="success" className=" mr-2" onClick={openNew} />
-                    <Button label="Excluir" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedPermissaoPerfilRecurso || !(selectedPermissaoPerfilRecurso as any).length} />
+                    <Button label="Excluir" icon="pi pi-trash" severity="danger" onClick={confirmDeleteSelected} disabled={!selectedPermissaoPerfilRecursos || !(selectedPermissaoPerfilRecursos as any).length} />
                 </div>
             </React.Fragment>
         );
@@ -288,7 +290,7 @@ const PermissaoPerfilRecurso = () => {
 
     const header = (
         <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
-            <h5 className="m-0">Gerenciamento de Permissões de Perfil</h5>
+            <h5 className="m-0">Gerenciamento de Permissão de Perfil</h5>
             <span className="block mt-2 md:mt-0 p-input-icon-left">
                 <i className="pi pi-search" />
                 <InputText type="search" onInput={(e) => setGlobalFilter(e.currentTarget.value)} placeholder="Search..." />
@@ -296,27 +298,28 @@ const PermissaoPerfilRecurso = () => {
         </div>
     );
 
-    const permissaoPerfilRecursoDialogFooter = (
+    const perfilDialogFooter = (
         <>
             <Button label="Cancelar" icon="pi pi-times" text onClick={hideDialog} />
             <Button label="Salvar" icon="pi pi-check" text onClick={savePermissaoPerfilRecurso} />
         </>
     );
-    const deletePermissaoPerfilRecursoDialogFooter = (
+    const deletePerfilDialogFooter = (
         <>
             <Button label="Não" icon="pi pi-times" text onClick={hideDeletePermissaoPerfilRecursoDialog} />
             <Button label="Sim" icon="pi pi-check" text onClick={deletePermissaoPerfilRecurso} />
         </>
     );
-    const deletePermissaoPerfilRecursosDialogFooter = (
+    const deletePerfisDialogFooter = (
         <>
             <Button label="Não" icon="pi pi-times" text onClick={hideDeletePermissaoPerfilRecursosDialog} />
             <Button label="Sim" icon="pi pi-check" text onClick={deleteSelectedPermissaoPerfilRecursos} />
         </>
     );
 
+
     const onSelectPerfilChange = (perfil: Projeto.Perfil) => {
-        let _permissaoPerfilRecurso = {...permissaoPerfilRecurso };
+        let _permissaoPerfilRecurso = {...permissaoPerfilRecurso};
         _permissaoPerfilRecurso.perfil = perfil;
         setPermissaoPerfilRecurso(_permissaoPerfilRecurso);
     };
@@ -336,9 +339,9 @@ const PermissaoPerfilRecurso = () => {
 
                     <DataTable
                         ref={dt}
-                        value={permissaoPerfilRecurso}
-                        selection={selectedPermissaoPerfilRecurso}
-                        onSelectionChange={(e) => setSelectedPermissaoPerfilRecurso(e.value as any)}
+                        value={permissaoPerfilRecursos}
+                        selection={selectedPermissaoPerfilRecursos}
+                        onSelectionChange={(e) => setSelectedPermissaoPerfilRecursos(e.value as any)}
                         dataKey="id"
                         paginator
                         rows={10}
@@ -347,7 +350,7 @@ const PermissaoPerfilRecurso = () => {
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Mostrando {first} até {last} de {totalRecords} permissões de perfil"
                         globalFilter={globalFilter}
-                        emptyMessage="Nenhuma permissão de perfil encontrado ."
+                        emptyMessage="Nenhuma permissão encontrada ."
                         header={header}
                         responsiveLayout="scroll"
                     >
@@ -358,7 +361,7 @@ const PermissaoPerfilRecurso = () => {
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                    <Dialog visible={permissaoPerfilRecursoDialog} style={{ width: '450px' }} header="Detalhes do perfil de usuário" modal className="p-fluid" footer={permissaoPerfilRecursoDialogFooter} onHide={hideDialog}>
+                    <Dialog visible={permissaoPerfilRecursoDialog} style={{ width: '450px' }} header="Detalhes do perfil de usuário" modal className="p-fluid" footer={perfilDialogFooter} onHide={hideDialog}>
                         <div className="field">
                             <label htmlFor="perfil">Perfil</label>
                                 <Dropdown optionLabel="descricao" value={permissaoPerfilRecurso.perfil} options={perfis} filter onChange={(e: DropdownChangeEvent) => onSelectPerfilChange(e.value)} placeholder='Selecione um perfil' />
@@ -376,18 +379,18 @@ const PermissaoPerfilRecurso = () => {
                             
                     </Dialog>
 
-                    <Dialog visible={deletePermissaoPerfilRecursoDialog} style={{ width: '450px' }} header="Confirmar" modal footer={deletePermissaoPerfilRecursoDialogFooter} onHide={hideDeletePermissaoPerfilRecursoDialog}>
+                    <Dialog visible={deletePermissaoPerfilRecursoDialog} style={{ width: '450px' }} header="Confirmar" modal footer={deletePerfilDialogFooter} onHide={hideDeletePermissaoPerfilRecursoDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                             {permissaoPerfilRecurso && (
                                 <span>
-                                    Você realmente deseja excluir a permissão?
+                                    Você realmente deseja excluir a permissão <b>{permissaoPerfilRecurso.id}</b>?
                                 </span>
                             )}
                         </div>
                     </Dialog>
 
-                    <Dialog visible={deletePermissaoPerfilRecursoDialog} style={{ width: '450px' }} header="Confirmar" modal footer={deletePermissaoPerfilRecursoDialogFooter} onHide={hideDeletePermissaoPerfilRecursosDialog}>
+                    <Dialog visible={deletePermissaoPerfilRecursosDialog} style={{ width: '450px' }} header="Confirmar" modal footer={deletePerfisDialogFooter} onHide={hideDeletePermissaoPerfilRecursosDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                             {permissaoPerfilRecurso && <span>Você realmente deseja excluir as permissões selecionadas?</span>}
